@@ -23,7 +23,7 @@ async function copyText(text) {
 }
 
 export default function Toc() {
-  const { enriched, ready, reload, busy, error, info } = useData();
+  const { enriched, ready, reload, busy } = useData();
   const [status, setStatus] = useState("");
 
   const newsHtml = useMemo(
@@ -49,10 +49,10 @@ export default function Toc() {
       await copyText(text);
       setStatus(
         kind === "news-html"
-          ? "已复制图文 HTML"
+          ? "已复制 HTML"
           : kind === "news"
-            ? "已复制图文注入脚本"
-            : "已复制贴图注入脚本"
+            ? "已复制图文脚本"
+            : "已复制贴图脚本"
       );
     } catch (e) {
       setStatus(`复制失败：${e}`);
@@ -61,36 +61,32 @@ export default function Toc() {
 
   return (
     <div className="page">
-      <div className="page-head">
-        <div>
-          <h1>TOC</h1>
-          <p className="muted">预览 · 复制注入脚本</p>
+      <div className="toolbar">
+        <span className="muted">{status || "预览并复制注入脚本"}</span>
+        <div className="row toolbar-actions">
+          <button
+            className="btn ghost sm"
+            type="button"
+            disabled={!ready || busy}
+            onClick={() => reload()}
+          >
+            刷新
+          </button>
         </div>
-        <button
-          className="btn ghost"
-          type="button"
-          disabled={!ready || busy}
-          onClick={() => reload()}
-        >
-          刷新
-        </button>
       </div>
-      {error ? <p className="err">{error}</p> : null}
-      {info ? <p className="ok">{info}</p> : null}
-      {status ? <p className="ok">{status}</p> : null}
 
       {!enriched ? (
-        <p className="muted">请先在「文章」页加载数据</p>
+        <div className="empty">先加载数据</div>
       ) : (
         <div className="toc-grid">
           <section className="panel">
             <div className="badge">图文</div>
             <h2>径向渐变 · 等宽双列</h2>
             <div className="row">
-              <button type="button" className="btn" onClick={() => copy("news")}>
-                复制注入脚本
+              <button type="button" className="btn sm" onClick={() => copy("news")}>
+                复制脚本
               </button>
-              <button type="button" className="btn ghost" onClick={() => copy("news-html")}>
+              <button type="button" className="btn ghost sm" onClick={() => copy("news-html")}>
                 复制 HTML
               </button>
             </div>
@@ -103,8 +99,8 @@ export default function Toc() {
             <div className="badge pic">贴图</div>
             <h2>引导语单列</h2>
             <div className="row">
-              <button type="button" className="btn" onClick={() => copy("pic")}>
-                复制注入脚本
+              <button type="button" className="btn sm" onClick={() => copy("pic")}>
+                复制脚本
               </button>
             </div>
             <div className="phone phone-pic">

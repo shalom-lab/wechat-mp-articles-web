@@ -4,13 +4,18 @@ import { testConnection } from "../lib/github.js";
 import { useData } from "../lib/dataStore.jsx";
 
 export default function Settings() {
-  const { setByok, setInfo, setError } = useData();
+  const { setByok, setError, reload } = useData();
   const initial = loadByok();
   const [repo, setRepo] = useState(initial.repo);
   const [token, setToken] = useState(initial.token);
   const [account, setAccount] = useState(initial.account || "epi-stats");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+
+  const dirty =
+    repo !== initial.repo ||
+    token !== initial.token ||
+    account !== (initial.account || "epi-stats");
 
   async function onSave(e) {
     e.preventDefault();
@@ -22,7 +27,7 @@ export default function Settings() {
       saveByok({ repo, token, account });
       setByok(loadByok());
       setMsg("已保存");
-      setInfo("");
+      await reload(account);
     } catch (err) {
       setMsg(err instanceof Error ? err.message : String(err));
     } finally {
@@ -41,13 +46,6 @@ export default function Settings() {
 
   return (
     <div className="page settings-page">
-      <div className="page-head">
-        <div>
-          <h1>设置</h1>
-          <p className="muted">连接数据仓库，密钥只存本机。</p>
-        </div>
-      </div>
-
       <form className="card form settings-card" onSubmit={onSave}>
         <label>
           仓库
@@ -82,10 +80,10 @@ export default function Settings() {
 
         <div className="settings-actions">
           <div className="row">
-            <button type="submit" className="btn" disabled={saving}>
+            <button type="submit" className="btn sm" disabled={saving || !dirty}>
               {saving ? "验证中…" : "保存"}
             </button>
-            <button type="button" className="btn ghost" onClick={onClear}>
+            <button type="button" className="btn ghost sm" onClick={onClear}>
               清除
             </button>
           </div>

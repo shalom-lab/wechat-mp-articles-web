@@ -8,8 +8,6 @@ export default function Articles() {
     rows,
     enriched,
     busy,
-    error,
-    info,
     dirty,
     reload,
     patchArticle,
@@ -39,34 +37,6 @@ export default function Articles() {
 
   return (
     <div className="page">
-      <div className="page-head">
-        <div>
-          <h1>文章</h1>
-          <p className="muted">短标题 / 类目 / 进 TOC</p>
-        </div>
-        <div className="row">
-          <button
-            className="btn ghost"
-            type="button"
-            disabled={!ready || busy}
-            onClick={() => reload()}
-          >
-            {busy ? "加载中…" : "加载"}
-          </button>
-          <button
-            className="btn"
-            type="button"
-            disabled={!ready || busy || !dirty || !enriched}
-            onClick={() => saveEnriched()}
-          >
-            保存{dirty ? " *" : ""}
-          </button>
-        </div>
-      </div>
-
-      {error ? <p className="banner err">{error}</p> : null}
-      {info ? <p className="banner ok">{info}</p> : null}
-
       <div className="toolbar">
         <input
           className="search"
@@ -79,7 +49,25 @@ export default function Articles() {
           <option>图文</option>
           <option>贴图</option>
         </select>
-        <span className="muted">显示 {filtered.length} / {rows.length}</span>
+        <span className="muted nowrap">显示 {filtered.length} / {rows.length}</span>
+        <div className="row toolbar-actions">
+          <button
+            className="btn ghost sm"
+            type="button"
+            disabled={!ready || busy}
+            onClick={() => reload()}
+          >
+            {busy ? "…" : "加载"}
+          </button>
+          <button
+            className="btn sm"
+            type="button"
+            disabled={!ready || busy || !dirty || !enriched}
+            onClick={() => saveEnriched()}
+          >
+            保存
+          </button>
+        </div>
       </div>
 
       <div className="table-wrap">

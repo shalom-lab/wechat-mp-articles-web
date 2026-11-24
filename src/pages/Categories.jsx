@@ -6,8 +6,6 @@ export default function Categories() {
     enriched,
     busy,
     dirty,
-    error,
-    info,
     reload,
     setCategories,
     saveEnriched,
@@ -46,35 +44,30 @@ export default function Categories() {
 
   return (
     <div className="page">
-      <div className="page-head">
-        <div>
-          <h1>类目</h1>
-          <p className="muted">拖排序用上下移；关进 TOC 则整类隐藏</p>
-        </div>
-        <div className="row">
+      <div className="toolbar">
+        <span className="muted">勾选 = 进 TOC · 上下移改顺序</span>
+        <div className="row toolbar-actions">
           <button
-            className="btn ghost"
+            className="btn ghost sm"
             type="button"
             disabled={!ready || busy}
             onClick={() => reload()}
           >
             加载
           </button>
-          <button className="btn ghost" type="button" disabled={!enriched} onClick={add}>
-            新增类目
+          <button className="btn ghost sm" type="button" disabled={!enriched} onClick={add}>
+            新增
           </button>
           <button
-            className="btn"
+            className="btn sm"
             type="button"
             disabled={!ready || busy || !dirty || !enriched}
             onClick={() => saveEnriched()}
           >
-            保存{dirty ? " *" : ""}
+            保存
           </button>
         </div>
       </div>
-      {error ? <p className="err">{error}</p> : null}
-      {info ? <p className="ok">{info}</p> : null}
 
       <div className="card">
         <ol className="cat-list">
@@ -103,7 +96,7 @@ export default function Categories() {
             </li>
           ))}
         </ol>
-        {!cats.length ? <p className="muted">暂无数据，先加载 enriched JSON</p> : null}
+        {!cats.length ? <p className="muted">暂无类目，先加载数据</p> : null}
       </div>
     </div>
   );
