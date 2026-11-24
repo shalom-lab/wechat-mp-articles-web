@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { categorySelectStyle } from "../lib/categoryColors.js";
 import { useData } from "../lib/dataStore.jsx";
 
 export default function Articles() {
@@ -123,7 +124,9 @@ export default function Articles() {
                 </td>
                 <td>
                   <select
+                    className="cat-select"
                     value={r.category}
+                    style={categorySelectStyle(r.category)}
                     onChange={(e) =>
                       patchArticle(r.content_url, { category: e.target.value })
                     }
