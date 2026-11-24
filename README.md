@@ -38,6 +38,14 @@ npm install
 npm run dev
 ```
 
+## CI/CD（GitHub Pages）
+
+- Workflow：`.github/workflows/pages.yml`（push `main` / 手动）
+- Vite `base`: `/wechat-mp-articles-web/`
+- 预计地址：`https://shalom-lab.github.io/wechat-mp-articles-web/`
+
+仓库需：Settings → Pages → Source = **GitHub Actions**。
+
 ## 页面
 
 1. **文章**：CSV 清单 + 可编辑短标题/类目/是否进 TOC → 保存写回 enriched JSON  
