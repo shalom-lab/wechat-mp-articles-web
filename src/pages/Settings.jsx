@@ -49,19 +49,10 @@ export default function Settings() {
 
   return (
     <div className="page">
-      <h1>设置 · BYOK</h1>
+      <h1>设置</h1>
       <p className="muted">
-        BYOK 只有两项密钥（本机 <code>localStorage</code>）：
-        <code>{KEY_REPO}</code>、<code>{KEY_TOKEN}</code>；启动自动读。
-      </p>
-      <p className="muted">
-        「账号 id」不是密钥，只是数据文件后缀（默认 <code>epi-stats</code> →
-        <code>data/articles_epi-stats.csv</code> /
-        <code>enriched_articles_epi-stats.json</code>），存在 <code>{KEY_ACCOUNT}</code>。
-      </p>
-      <p className="muted">
-        指向 <strong>wechat-mp-articles</strong> 数据仓库。本 Web 只做人机微调，不替代
-        filter / enrich / toc Action。
+        BYOK：<code>{KEY_REPO}</code> + <code>{KEY_TOKEN}</code>（本机 localStorage）。数据在
+        wechat-mp-articles，本站不存业务数据。
       </p>
       <form className="card form" onSubmit={onSave}>
         <label>

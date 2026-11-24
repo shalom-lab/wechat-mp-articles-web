@@ -106,7 +106,20 @@ export default function Articles() {
                     }
                   />
                 </td>
-                <td>{r.content_type_label || "—"}</td>
+                <td>
+                  <span
+                    className={
+                      "type-chip" +
+                      (r.content_type_label === "贴图"
+                        ? " is-pic"
+                        : r.content_type_label === "图文"
+                          ? " is-news"
+                          : "")
+                    }
+                  >
+                    {r.content_type_label || "—"}
+                  </span>
+                </td>
                 <td className="nowrap">{r.publishedDate || "—"}</td>
                 <td className="title-cell" title={r.content_url}>
                   <a href={r.content_url} target="_blank" rel="noreferrer">
@@ -143,6 +156,9 @@ export default function Articles() {
             ))}
           </tbody>
         </table>
+        {!filtered.length ? (
+          <div className="empty">暂无行数据。先点「加载」，或换账号实例再试。</div>
+        ) : null}
       </div>
     </div>
   );
