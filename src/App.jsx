@@ -11,7 +11,7 @@ function Shell() {
   return (
     <div className="app">
       <header className="top">
-        <div className="brand">WMA Console</div>
+        <div className="brand">往期文章工作台</div>
         <nav>
           <NavLink to="/">文章</NavLink>
           <NavLink to="/categories">类目</NavLink>

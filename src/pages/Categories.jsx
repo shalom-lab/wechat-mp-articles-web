@@ -48,14 +48,16 @@ export default function Categories() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>类目与 TOC 顺序</h1>
-          <p className="muted">
-            数组顺序即 TOC 展示顺序；关闭「进 TOC」则整类不出现。enrich Action
-            会保留你的顺序与开关，只把代码里新增的默认类目追加到末尾。
-          </p>
+          <h1>类目</h1>
+          <p className="muted">顺序即 TOC 顺序；关掉「进 TOC」整类不展示。人工顺序会在 enrich 时保留。</p>
         </div>
         <div className="row">
-          <button className="btn ghost" type="button" disabled={!ready || busy} onClick={reload}>
+          <button
+            className="btn ghost"
+            type="button"
+            disabled={!ready || busy}
+            onClick={() => reload()}
+          >
             加载
           </button>
           <button className="btn ghost" type="button" disabled={!enriched} onClick={add}>

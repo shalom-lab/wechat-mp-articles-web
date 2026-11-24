@@ -74,10 +74,12 @@ export function DataProvider({ children }) {
     setBusy(true);
     try {
       const list = await refreshAccountList();
-      let id = String(nextAccount || account || "").trim();
-      if (!id) {
-        id = list[0]?.id || "epi-stats";
-      }
+      // 只接受字符串 id；避免 onClick={reload} 把事件对象当成账号
+      const raw =
+        typeof nextAccount === "string" && nextAccount.trim()
+          ? nextAccount.trim()
+          : String(account || "").trim();
+      let id = raw || list[0]?.id || "epi-stats";
       if (id !== account) {
         const next = { ...byok, account: id };
         saveByok(next);

@@ -40,16 +40,17 @@ export default function Articles() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>文章微调</h1>
-          <p className="muted">
-            以 CSV 为清单主数据（filter 会刷新库存字段）；可改的是 enriched 里的
-            <strong> 类目 / 短标题 / 是否进 TOC</strong>。保存只写
-            enriched JSON，enrich Action 不会覆盖你已填的字段。
-          </p>
+          <h1>往期文章工作台</h1>
+          <p className="muted">改短标题、类目、是否进 TOC；保存写入 enriched，不影响 filter 自动化。</p>
         </div>
         <div className="row">
-          <button className="btn ghost" type="button" disabled={!ready || busy} onClick={reload}>
-            {busy ? "加载中…" : "从 GitHub 加载"}
+          <button
+            className="btn ghost"
+            type="button"
+            disabled={!ready || busy}
+            onClick={() => reload()}
+          >
+            {busy ? "加载中…" : "加载"}
           </button>
           <button
             className="btn"
@@ -57,13 +58,13 @@ export default function Articles() {
             disabled={!ready || busy || !dirty || !enriched}
             onClick={() => saveEnriched()}
           >
-            保存到 GitHub{dirty ? " *" : ""}
+            保存{dirty ? " *" : ""}
           </button>
         </div>
       </div>
 
-      {error ? <p className="err">{error}</p> : null}
-      {info ? <p className="ok">{info}</p> : null}
+      {error ? <p className="banner err">{error}</p> : null}
+      {info ? <p className="banner ok">{info}</p> : null}
 
       <div className="toolbar">
         <input

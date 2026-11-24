@@ -13,11 +13,16 @@ export const KEY_ACCOUNT = `${APP}-account`;
 
 const LEGACY_ACCOUNT = `gh-${APP}-account`;
 
+function cleanAccount(raw) {
+  const s = String(raw || "").trim();
+  if (!s || s === "[object Object]") return "epi-stats";
+  return s;
+}
+
 export function loadByok() {
-  const account =
-    localStorage.getItem(KEY_ACCOUNT) ||
-    localStorage.getItem(LEGACY_ACCOUNT) ||
-    "epi-stats";
+  const account = cleanAccount(
+    localStorage.getItem(KEY_ACCOUNT) || localStorage.getItem(LEGACY_ACCOUNT)
+  );
   return {
     repo: localStorage.getItem(KEY_REPO) || "",
     token: localStorage.getItem(KEY_TOKEN) || "",

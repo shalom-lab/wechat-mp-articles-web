@@ -63,14 +63,16 @@ export default function Toc() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>TOC 预览与复制</h1>
-          <p className="muted">
-            与仓库 <code>npm run toc:epi-stats</code> / out 产物同逻辑。此处方便人工预览；正式产物仍由
-            articles 仓库脚本与 toc Action 生成到 <code>out/</code>。
-          </p>
+          <h1>TOC</h1>
+          <p className="muted">预览并复制注入脚本（与 articles 仓库 toc 产物同逻辑）。</p>
         </div>
-        <button className="btn ghost" type="button" disabled={!ready || busy} onClick={reload}>
-          刷新数据
+        <button
+          className="btn ghost"
+          type="button"
+          disabled={!ready || busy}
+          onClick={() => reload()}
+        >
+          刷新
         </button>
       </div>
       {error ? <p className="err">{error}</p> : null}
