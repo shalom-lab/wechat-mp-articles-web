@@ -109,7 +109,7 @@ export default function Categories() {
   return (
     <div className="page">
       <div className="toolbar">
-        <span className="muted">勾选 = 进 TOC · 图标调整顺序</span>
+        <span className="muted">勾选 = TOC · 图标调整顺序</span>
         <div className="row toolbar-actions">
           <button
             className="btn ghost sm"
@@ -141,7 +141,7 @@ export default function Categories() {
                 type="checkbox"
                 checked={c.includeInToc !== false}
                 onChange={(e) => toggle(idx, e.target.checked)}
-                title="进 TOC"
+                title="TOC"
               />
               <input
                 className="cell-input"

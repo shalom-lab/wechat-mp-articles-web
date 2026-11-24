@@ -175,6 +175,18 @@ main { padding: 14px 16px 48px; max-width: 1180px; margin: 0 auto; }
   box-shadow: var(--shadow);
 }
 .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; line-height: 1.25; }
+.data-table th.sortable { padding: 0; }
+.sort-btn {
+  width: 100%; display: inline-flex; align-items: center; gap: 4px;
+  border: 0; background: transparent; padding: 4px 8px; margin: 0;
+  font: inherit; font-weight: 650; color: #5a6a78; cursor: pointer; text-align: left;
+}
+.sort-btn:hover { color: var(--accent); background: rgba(8, 122, 156, 0.06); }
+.sort-btn.is-active { color: var(--accent); }
+.sort-ind {
+  font-size: 10px; opacity: .45; font-weight: 700; line-height: 1;
+}
+.sort-btn.is-active .sort-ind { opacity: 1; }
 .data-table th, .data-table td {
   border-bottom: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: middle;
 }
