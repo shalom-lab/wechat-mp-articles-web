@@ -49,7 +49,7 @@ export default function Categories() {
       <div className="page-head">
         <div>
           <h1>类目</h1>
-          <p className="muted">顺序即 TOC 顺序；关掉「进 TOC」整类不展示。人工顺序会在 enrich 时保留。</p>
+          <p className="muted">拖排序用上下移；关进 TOC 则整类隐藏</p>
         </div>
         <div className="row">
           <button

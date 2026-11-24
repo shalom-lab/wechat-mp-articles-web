@@ -64,7 +64,7 @@ export default function Toc() {
       <div className="page-head">
         <div>
           <h1>TOC</h1>
-          <p className="muted">预览并复制注入脚本（与 articles 仓库 toc 产物同逻辑）。</p>
+          <p className="muted">预览 · 复制注入脚本</p>
         </div>
         <button
           className="btn ghost"

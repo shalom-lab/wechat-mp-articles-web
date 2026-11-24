@@ -41,8 +41,8 @@ export default function Articles() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>往期文章工作台</h1>
-          <p className="muted">改短标题、类目、是否进 TOC；保存写入 enriched，不影响 filter 自动化。</p>
+          <h1>文章</h1>
+          <p className="muted">短标题 / 类目 / 进 TOC</p>
         </div>
         <div className="row">
           <button
