@@ -217,6 +217,7 @@ export function DataProvider({ children }) {
         ...enriched,
         account: id,
         updatedAt: new Date().toISOString(),
+        categories: normalizeCategories(enriched.categories),
         article_count: enriched.articles?.length || 0,
         enriched_count: (enriched.articles || []).filter(
           (a) =>

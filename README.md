@@ -3,7 +3,7 @@
 人工微调控制台：通过 **BYOK** 直连 GitHub 上的 `wechat-mp-articles` 数据仓库。
 
 - **不替代** filter / enrich / toc 自动化；正式 TOC HTML / inject 仍由 articles 仓库 `npm run toc:*` 与 `toc-epi-stats` Action 写到 `out/`
-- 本应用方便：表格微调 enriched、调整类目顺序/开关、预览并复制注入脚本
+- 本应用方便：表格微调 enriched、调整类目顺序/开关/emoji/显示名、预览并复制注入脚本
 
 ## BYOK（localStorage）
 
@@ -27,9 +27,9 @@
 | 文件 | 角色 |
 | --- | --- |
 | `data/articles_<id>.csv` | filter 刷新的库存主清单（标题/日期/类型等） |
-| `data/enriched_articles_<id>.json` | enrich + **人工** 层：`category` / `displayTitle` / `includeInToc` / `categories[]` |
+| `data/enriched_articles_<id>.json` | enrich + **人工** 层：`category` / `displayTitle` / `includeInToc` / `categories[{ name, includeInToc, emoji, caption }]` |
 
-enrich Action **不会**覆盖已有 `category`、`displayTitle`、`includeInToc`，并保留人工类目顺序与开关。
+enrich Action **不会**覆盖已有 `category`、`displayTitle`、`includeInToc`，并保留人工类目顺序、开关、`emoji`、`caption`。
 
 ## 本地开发
 
@@ -49,6 +49,6 @@ npm run dev
 ## 页面
 
 1. **文章**：CSV 清单 + 可编辑短标题/类目/是否进 TOC → 保存写回 enriched JSON  
-2. **类目**：TOC 顺序与是否展示  
+2. **类目**：TOC 顺序、开关、emoji、显示名（图文标题用 `emoji+caption`）  
 3. **TOC**：图文 / 贴图预览与复制注入脚本（逻辑对齐 articles 的 build-wechat-toc）  
 4. **设置**：BYOK
