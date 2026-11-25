@@ -71,28 +71,16 @@ export default function Toc() {
     [newsSingleHtml]
   );
 
-  const picSingleHtml = useMemo(
-    () => (enriched ? buildPicHtml(enriched, "单列") : ""),
+  const picHtml = useMemo(
+    () => (enriched ? buildPicHtml(enriched) : ""),
     [enriched]
   );
-  const picDualHtml = useMemo(
-    () => (enriched ? buildPicHtml(enriched, "双列") : ""),
+  const picInject = useMemo(
+    () => (enriched ? buildPicInject(enriched) : ""),
     [enriched]
   );
-  const picSingleInject = useMemo(
-    () => (enriched ? buildPicInject(enriched, "单列") : ""),
-    [enriched]
-  );
-  const picDualInject = useMemo(
-    () => (enriched ? buildPicInject(enriched, "双列") : ""),
-    [enriched]
-  );
-  const picSingleGroups = useMemo(
-    () => (enriched ? buildPicPreviewGroups(enriched, "单列") : []),
-    [enriched]
-  );
-  const picDualGroups = useMemo(
-    () => (enriched ? buildPicPreviewGroups(enriched, "双列") : []),
+  const picGroups = useMemo(
+    () => (enriched ? buildPicPreviewGroups(enriched) : []),
     [enriched]
   );
 
@@ -108,7 +96,9 @@ export default function Toc() {
   return (
     <div className="page">
       <div className="toolbar">
-        <span className="muted">{status || "图文/贴图各有双列与单列，按需复制"}</span>
+        <span className="muted">
+          {status || "图文双列/单列 · 贴图仅单列（不支持表格）"}
+        </span>
         <div className="row toolbar-actions">
           <button
             className="btn ghost sm"
@@ -151,12 +141,12 @@ export default function Toc() {
             badge="贴图"
             badgeClass="pic"
             title="单列 · 引导语"
-            onCopyScript={() => copy("贴图单列脚本", picSingleInject)}
-            onCopyHtml={() => copy("贴图单列 HTML", picSingleHtml)}
+            onCopyScript={() => copy("贴图脚本", picInject)}
+            onCopyHtml={() => copy("贴图 HTML", picHtml)}
           >
             <div className="phone phone-pic">
               <div className="guide">
-                {picSingleGroups.map((g, gi) => (
+                {picGroups.map((g, gi) => (
                   <div key={g.category} className={gi ? "pic-group gap" : "pic-group"}>
                     <div className="pic-cat">{g.category}</div>
                     {g.items.map((it) => (
@@ -164,42 +154,6 @@ export default function Toc() {
                         <a href={it.href} target="_blank" rel="noreferrer">
                           {it.title}
                         </a>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Panel>
-
-          <Panel
-            badge="贴图"
-            badgeClass="pic"
-            title="双列 · 引导语 左｜右"
-            onCopyScript={() => copy("贴图双列脚本", picDualInject)}
-            onCopyHtml={() => copy("贴图双列 HTML", picDualHtml)}
-          >
-            <div className="phone">
-              <div className="article" dangerouslySetInnerHTML={{ __html: picDualHtml }} />
-            </div>
-            <div className="phone phone-pic" style={{ marginTop: 10 }}>
-              <div className="guide">
-                {picDualGroups.map((g, gi) => (
-                  <div key={g.category} className={gi ? "pic-group gap" : "pic-group"}>
-                    <div className="pic-cat">{g.category}</div>
-                    {(g.left || []).map((it, i) => (
-                      <div key={`${it.href}-row`} className="pic-link">
-                        <a href={it.href} target="_blank" rel="noreferrer">
-                          {it.title}
-                        </a>
-                        {g.right?.[i] ? (
-                          <>
-                            {" ｜ "}
-                            <a href={g.right[i].href} target="_blank" rel="noreferrer">
-                              {g.right[i].title}
-                            </a>
-                          </>
-                        ) : null}
                       </div>
                     ))}
                   </div>

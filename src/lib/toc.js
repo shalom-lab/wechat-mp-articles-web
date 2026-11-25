@@ -179,7 +179,7 @@ function renderCategorySingle({ category, items }) {
 }
 
 function wrapEditorHtml(blocks) {
-  // 类目之间只留一点点空隙（图文双列/单列、贴图双列）；贴图单列不走这里
+  // 类目之间只留一点点空隙（图文双列/单列）
   const spacer =
     `<p style="margin:0;padding:0;line-height:1;font-size:6px;height:6px;">` +
     `<span leaf=""><br></span></p>`;
@@ -226,15 +226,10 @@ function picDataGroups(enriched) {
   );
 }
 
-/** 贴图双列：与图文同款表格 HTML（方便预览/对照） */
-export function buildPicHtml(enriched, layout = "单列") {
-  if (layout === "双列") {
-    const cats = resolveTocCategories(enriched.categories);
-    const groups = groupByCategory(filterArticles(enriched.articles, "贴图"), cats);
-    return wrapEditorHtml(groups.map(renderCategoryDual));
-  }
+/** 贴图单列可读预览 HTML */
+export function buildPicHtml(enriched) {
   const groups = picDataGroups(enriched);
-  const body = groups
+  return groups
     .map((g, gi) => {
       const links = (g.items || [])
         .map(
@@ -250,16 +245,14 @@ export function buildPicHtml(enriched, layout = "单列") {
       );
     })
     .join("");
-  return body;
 }
 
-/** layout: "单列" | "双列"；双列在引导语里用 左｜右 */
-export function buildPicInject(enriched, layout = "单列") {
+/** 贴图引导语单列注入（贴图不支持表格，无双列） */
+export function buildPicInject(enriched) {
   const groups = picDataGroups(enriched);
   return (
     `(() => {\n` +
-    `  const groups = ${JSON.stringify(groups, null, 2)};\n` +
-    `  const layout = ${JSON.stringify(layout)};\n\n` +
+    `  const groups = ${JSON.stringify(groups, null, 2)};\n\n` +
     `  const guide = document.querySelector('#guide_words_main');\n` +
     `  if (!guide) throw new Error('未找到 #guide_words_main（请确认在贴图编辑页）');\n` +
     `  const pm = document.querySelector('.share-text__input .ProseMirror');\n` +
@@ -279,54 +272,27 @@ export function buildPicInject(enriched, layout = "单列") {
     `        itemShowType: String(it.itemShowType),\n` +
     `        uniqueId: uid(),\n` +
     `      }),\n` +
-    `    ]);\n` +
-    `  const splitTwo = (items) => {\n` +
-    `    const mid = Math.ceil(items.length / 2);\n` +
-    `    return [items.slice(0, mid), items.slice(mid)];\n` +
-    `  };\n\n` +
+    `    ]);\n\n` +
     `  const nodes = [];\n` +
     `  groups.forEach((g, gi) => {\n` +
-    `    if (gi) {\n` +
-    `      if (layout === '双列') nodes.push(br());\n` +
-    `      else nodes.push(br(), br());\n` +
-    `    }\n` +
+    `    if (gi) nodes.push(br(), br());\n` +
     `    nodes.push(schema.text(g.category));\n` +
-    `    if (layout === '双列') {\n` +
-    `      const [left, right] = splitTwo(g.items || []);\n` +
-    `      const n = Math.max(left.length, right.length);\n` +
-    `      for (let i = 0; i < n; i++) {\n` +
-    `        nodes.push(br());\n` +
-    `        if (left[i]) nodes.push(linkText(left[i]));\n` +
-    `        if (left[i] && right[i]) nodes.push(schema.text(' ｜ '));\n` +
-    `        if (right[i]) nodes.push(linkText(right[i]));\n` +
-    `      }\n` +
-    `    } else {\n` +
-    `      (g.items || []).forEach((it) => {\n` +
-    `        nodes.push(br(), linkText(it));\n` +
-    `      });\n` +
-    `    }\n` +
+    `    (g.items || []).forEach((it) => {\n` +
+    `      nodes.push(br(), linkText(it));\n` +
+    `    });\n` +
     `  });\n` +
     `  nodes.push(br());\n\n` +
     `  view.dispatch(view.state.tr.replaceWith(0, view.state.doc.content.size, nodes));\n` +
     `  const content = vue.getContent ? vue.getContent() : null;\n` +
-    `  console.log('贴图引导语已写入', { layout, groups: groups.length, content });\n` +
+    `  console.log('贴图引导语已写入', { groups: groups.length, content });\n` +
     `  return content;\n` +
     `})();\n`
   );
 }
 
-export function buildPicPreviewGroups(enriched, layout = "单列") {
-  const groups = picDataGroups(enriched).map((g) => ({
+export function buildPicPreviewGroups(enriched) {
+  return picDataGroups(enriched).map((g) => ({
     category: g.category,
     items: g.items.map((it) => ({ title: it.title, href: it.href })),
   }));
-  if (layout !== "双列") return groups;
-  return groups.map((g) => {
-    const mid = Math.ceil(g.items.length / 2);
-    return {
-      category: g.category,
-      left: g.items.slice(0, mid),
-      right: g.items.slice(mid),
-    };
-  });
 }
