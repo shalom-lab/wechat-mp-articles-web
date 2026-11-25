@@ -3,6 +3,7 @@ import { useData } from "../lib/dataStore.jsx";
 import {
   buildNewsHtml,
   buildNewsInject,
+  buildPicHtml,
   buildPicInject,
   buildPicPreviewGroups,
 } from "../lib/toc.js";
@@ -22,38 +23,83 @@ async function copyText(text) {
   ta.remove();
 }
 
+function Panel({
+  badge,
+  badgeClass,
+  title,
+  onCopyScript,
+  onCopyHtml,
+  children,
+}) {
+  return (
+    <section className="panel">
+      <div className={"badge" + (badgeClass ? ` ${badgeClass}` : "")}>{badge}</div>
+      <h2>{title}</h2>
+      <div className="row">
+        <button type="button" className="btn sm" onClick={onCopyScript}>
+          复制脚本
+        </button>
+        {onCopyHtml ? (
+          <button type="button" className="btn ghost sm" onClick={onCopyHtml}>
+            复制 HTML
+          </button>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export default function Toc() {
   const { enriched, ready, reload, busy } = useData();
   const [status, setStatus] = useState("");
 
-  const newsHtml = useMemo(
-    () => (enriched ? buildNewsHtml(enriched) : ""),
+  const newsDualHtml = useMemo(
+    () => (enriched ? buildNewsHtml(enriched, "双列") : ""),
     [enriched]
   );
-  const newsInject = useMemo(
-    () => (newsHtml ? buildNewsInject(newsHtml) : ""),
-    [newsHtml]
-  );
-  const picInject = useMemo(
-    () => (enriched ? buildPicInject(enriched) : ""),
+  const newsSingleHtml = useMemo(
+    () => (enriched ? buildNewsHtml(enriched, "单列") : ""),
     [enriched]
   );
-  const picGroups = useMemo(
-    () => (enriched ? buildPicPreviewGroups(enriched) : []),
+  const newsDualInject = useMemo(
+    () => (newsDualHtml ? buildNewsInject(newsDualHtml) : ""),
+    [newsDualHtml]
+  );
+  const newsSingleInject = useMemo(
+    () => (newsSingleHtml ? buildNewsInject(newsSingleHtml) : ""),
+    [newsSingleHtml]
+  );
+
+  const picSingleHtml = useMemo(
+    () => (enriched ? buildPicHtml(enriched, "单列") : ""),
+    [enriched]
+  );
+  const picDualHtml = useMemo(
+    () => (enriched ? buildPicHtml(enriched, "双列") : ""),
+    [enriched]
+  );
+  const picSingleInject = useMemo(
+    () => (enriched ? buildPicInject(enriched, "单列") : ""),
+    [enriched]
+  );
+  const picDualInject = useMemo(
+    () => (enriched ? buildPicInject(enriched, "双列") : ""),
+    [enriched]
+  );
+  const picSingleGroups = useMemo(
+    () => (enriched ? buildPicPreviewGroups(enriched, "单列") : []),
+    [enriched]
+  );
+  const picDualGroups = useMemo(
+    () => (enriched ? buildPicPreviewGroups(enriched, "双列") : []),
     [enriched]
   );
 
-  async function copy(kind) {
+  async function copy(label, text) {
     try {
-      const text = kind === "news-html" ? newsHtml : kind === "news" ? newsInject : picInject;
       await copyText(text);
-      setStatus(
-        kind === "news-html"
-          ? "已复制 HTML"
-          : kind === "news"
-            ? "已复制图文脚本"
-            : "已复制贴图脚本"
-      );
+      setStatus(`已复制${label}`);
     } catch (e) {
       setStatus(`复制失败：${e}`);
     }
@@ -62,7 +108,7 @@ export default function Toc() {
   return (
     <div className="page">
       <div className="toolbar">
-        <span className="muted">{status || "预览并复制注入脚本"}</span>
+        <span className="muted">{status || "图文/贴图各有双列与单列，按需复制"}</span>
         <div className="row toolbar-actions">
           <button
             className="btn ghost sm"
@@ -79,33 +125,38 @@ export default function Toc() {
         <div className="empty">先加载数据</div>
       ) : (
         <div className="toc-grid">
-          <section className="panel">
-            <div className="badge">图文</div>
-            <h2>径向渐变 · 等宽双列</h2>
-            <div className="row">
-              <button type="button" className="btn sm" onClick={() => copy("news")}>
-                复制脚本
-              </button>
-              <button type="button" className="btn ghost sm" onClick={() => copy("news-html")}>
-                复制 HTML
-              </button>
-            </div>
+          <Panel
+            badge="图文"
+            title="双列 · 径向渐变"
+            onCopyScript={() => copy("图文双列脚本", newsDualInject)}
+            onCopyHtml={() => copy("图文双列 HTML", newsDualHtml)}
+          >
             <div className="phone">
-              <div className="article" dangerouslySetInnerHTML={{ __html: newsHtml }} />
+              <div className="article" dangerouslySetInnerHTML={{ __html: newsDualHtml }} />
             </div>
-          </section>
+          </Panel>
 
-          <section className="panel">
-            <div className="badge pic">贴图</div>
-            <h2>引导语单列</h2>
-            <div className="row">
-              <button type="button" className="btn sm" onClick={() => copy("pic")}>
-                复制脚本
-              </button>
+          <Panel
+            badge="图文"
+            title="单列 · 径向渐变"
+            onCopyScript={() => copy("图文单列脚本", newsSingleInject)}
+            onCopyHtml={() => copy("图文单列 HTML", newsSingleHtml)}
+          >
+            <div className="phone">
+              <div className="article" dangerouslySetInnerHTML={{ __html: newsSingleHtml }} />
             </div>
+          </Panel>
+
+          <Panel
+            badge="贴图"
+            badgeClass="pic"
+            title="单列 · 引导语"
+            onCopyScript={() => copy("贴图单列脚本", picSingleInject)}
+            onCopyHtml={() => copy("贴图单列 HTML", picSingleHtml)}
+          >
             <div className="phone phone-pic">
               <div className="guide">
-                {picGroups.map((g, gi) => (
+                {picSingleGroups.map((g, gi) => (
                   <div key={g.category} className={gi ? "pic-group gap" : "pic-group"}>
                     <div className="pic-cat">{g.category}</div>
                     {g.items.map((it) => (
@@ -119,7 +170,43 @@ export default function Toc() {
                 ))}
               </div>
             </div>
-          </section>
+          </Panel>
+
+          <Panel
+            badge="贴图"
+            badgeClass="pic"
+            title="双列 · 引导语 左｜右"
+            onCopyScript={() => copy("贴图双列脚本", picDualInject)}
+            onCopyHtml={() => copy("贴图双列 HTML", picDualHtml)}
+          >
+            <div className="phone">
+              <div className="article" dangerouslySetInnerHTML={{ __html: picDualHtml }} />
+            </div>
+            <div className="phone phone-pic" style={{ marginTop: 10 }}>
+              <div className="guide">
+                {picDualGroups.map((g, gi) => (
+                  <div key={g.category} className={gi ? "pic-group gap" : "pic-group"}>
+                    <div className="pic-cat">{g.category}</div>
+                    {(g.left || []).map((it, i) => (
+                      <div key={`${it.href}-row`} className="pic-link">
+                        <a href={it.href} target="_blank" rel="noreferrer">
+                          {it.title}
+                        </a>
+                        {g.right?.[i] ? (
+                          <>
+                            {" ｜ "}
+                            <a href={g.right[i].href} target="_blank" rel="noreferrer">
+                              {g.right[i].title}
+                            </a>
+                          </>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Panel>
         </div>
       )}
     </div>

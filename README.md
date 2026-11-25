@@ -50,5 +50,5 @@ npm run dev
 
 1. **文章**：CSV 清单 + 可编辑短标题/类目/是否进 TOC → 保存写回 enriched JSON  
 2. **类目**：TOC 顺序、开关、emoji（图文标题用 `emoji+类目名`；改名同步文章归属）  
-3. **TOC**：图文 / 贴图预览与复制注入脚本（逻辑对齐 articles 的 build-wechat-toc）  
+3. **TOC**：图文/贴图各有双列与单列预览与复制（对齐 articles 的 build-wechat-toc）  
 4. **设置**：BYOK

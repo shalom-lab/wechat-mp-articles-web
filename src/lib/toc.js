@@ -143,17 +143,24 @@ function renderColumn(items) {
   );
 }
 
-function renderCategoryBlock({ category, items }) {
-  const [left, right] = splitTwoColumns(items);
+const TITLE_BG =
+  `background-image: radial-gradient(ellipse 70% 100% at 50% 50%, ` +
+  `rgba(0, 122, 170, 0.22) 0%, rgba(0, 122, 170, 0.10) 45%, ` +
+  `rgba(0, 122, 170, 0) 100%);background-color: transparent;`;
+
+function renderCategoryTitle(category) {
   const title = escHtml(categoryLabel(category));
-  const titleBg =
-    `background-image: radial-gradient(ellipse 70% 100% at 50% 50%, ` +
-    `rgba(0, 122, 170, 0.22) 0%, rgba(0, 122, 170, 0.10) 45%, ` +
-    `rgba(0, 122, 170, 0) 100%);background-color: transparent;`;
+  return (
+    `<p style="text-align: center;margin: 0 0 2px;padding: 6px 4px;${TITLE_BG}">` +
+    `<strong><span style="color: rgb(0, 122, 170);"><span leaf="">${title}</span></span></strong></p>`
+  );
+}
+
+function renderCategoryDual({ category, items }) {
+  const [left, right] = splitTwoColumns(items);
   return (
     `<section class="news-class" style="border: none;padding: 0;margin: 0;box-sizing: border-box;">` +
-    `<p style="text-align: center;margin: 0 0 2px;padding: 6px 4px;${titleBg}">` +
-    `<strong><span style="color: rgb(0, 122, 170);"><span leaf="">${title}</span></span></strong></p>` +
+    renderCategoryTitle(category) +
     `<table class="news-class" cellpadding="0" cellspacing="0" border="0" ` +
     `style="border: none;border-collapse: collapse;border-width: 0;width: 100%;table-layout: fixed;margin: 0;">` +
     `<colgroup><col style="width: 50%;" /><col style="width: 50%;" /></colgroup>` +
@@ -161,15 +168,31 @@ function renderCategoryBlock({ category, items }) {
   );
 }
 
-export function buildNewsHtml(enriched) {
-  const cats = resolveTocCategories(enriched.categories);
-  const groups = groupByCategory(filterArticles(enriched.articles, "图文"), cats);
+function renderCategorySingle({ category, items }) {
+  return (
+    `<section class="news-class" style="border: none;padding: 0;margin: 0;box-sizing: border-box;">` +
+    renderCategoryTitle(category) +
+    `<ul style="list-style-type: none;list-style: none;margin: 0;padding-left: 0;overflow: visible;">` +
+    items.map((a) => `<li><p>${renderLink(a)}</p></li>`).join("") +
+    `</ul></section>`
+  );
+}
+
+function wrapEditorHtml(blocks) {
   const spacer = `<p style="margin-bottom: 0px;"><span leaf=""><br></span></p>`;
   const footer =
     `<p style="margin-bottom: 0px;"><span style="font-size: var(--articleFontsize);letter-spacing: 0.034em;"></span></p>` +
     `<section><span leaf=""><br></span></section>` +
     `<p style="display: none;"><mp-style-type data-value="3"></mp-style-type></p>`;
-  return groups.map(renderCategoryBlock).join(spacer) + footer + "\n";
+  return blocks.join(spacer) + footer + "\n";
+}
+
+/** layout: "双列" | "单列" */
+export function buildNewsHtml(enriched, layout = "双列") {
+  const cats = resolveTocCategories(enriched.categories);
+  const groups = groupByCategory(filterArticles(enriched.articles, "图文"), cats);
+  const render = layout === "单列" ? renderCategorySingle : renderCategoryDual;
+  return wrapEditorHtml(groups.map(render));
 }
 
 export function buildNewsInject(html) {
@@ -184,9 +207,9 @@ export function buildNewsInject(html) {
   );
 }
 
-export function buildPicInject(enriched) {
+function picDataGroups(enriched) {
   const cats = resolveTocCategories(enriched.categories);
-  const groups = groupByCategory(filterArticles(enriched.articles, "贴图"), cats).map(
+  return groupByCategory(filterArticles(enriched.articles, "贴图"), cats).map(
     ({ category, items }) => ({
       category: categoryLabelPic(category),
       items: items.map((a) => ({
@@ -198,10 +221,42 @@ export function buildPicInject(enriched) {
       })),
     })
   );
+}
 
+/** 贴图双列：与图文同款表格 HTML（方便预览/对照） */
+export function buildPicHtml(enriched, layout = "单列") {
+  if (layout === "双列") {
+    const cats = resolveTocCategories(enriched.categories);
+    const groups = groupByCategory(filterArticles(enriched.articles, "贴图"), cats);
+    return wrapEditorHtml(groups.map(renderCategoryDual));
+  }
+  const groups = picDataGroups(enriched);
+  const body = groups
+    .map((g, gi) => {
+      const links = (g.items || [])
+        .map(
+          (it) =>
+            `<div style="margin:2px 0;"><a href="${escAttr(it.href)}" target="_blank" rel="noreferrer">${escHtml(it.title)}</a></div>`
+        )
+        .join("");
+      return (
+        `<section style="margin-top:${gi ? "1.1em" : "0"};">` +
+        `<div style="font-weight:650;margin-bottom:4px;">${escHtml(g.category)}</div>` +
+        links +
+        `</section>`
+      );
+    })
+    .join("");
+  return body;
+}
+
+/** layout: "单列" | "双列"；双列在引导语里用 左｜右 */
+export function buildPicInject(enriched, layout = "单列") {
+  const groups = picDataGroups(enriched);
   return (
     `(() => {\n` +
-    `  const groups = ${JSON.stringify(groups, null, 2)};\n\n` +
+    `  const groups = ${JSON.stringify(groups, null, 2)};\n` +
+    `  const layout = ${JSON.stringify(layout)};\n\n` +
     `  const guide = document.querySelector('#guide_words_main');\n` +
     `  if (!guide) throw new Error('未找到 #guide_words_main（请确认在贴图编辑页）');\n` +
     `  const pm = document.querySelector('.share-text__input .ProseMirror');\n` +
@@ -221,33 +276,51 @@ export function buildPicInject(enriched) {
     `        itemShowType: String(it.itemShowType),\n` +
     `        uniqueId: uid(),\n` +
     `      }),\n` +
-    `    ]);\n\n` +
+    `    ]);\n` +
+    `  const splitTwo = (items) => {\n` +
+    `    const mid = Math.ceil(items.length / 2);\n` +
+    `    return [items.slice(0, mid), items.slice(mid)];\n` +
+    `  };\n\n` +
     `  const nodes = [];\n` +
     `  groups.forEach((g, gi) => {\n` +
     `    if (gi) nodes.push(br(), br());\n` +
     `    nodes.push(schema.text(g.category));\n` +
-    `    g.items.forEach((it) => {\n` +
-    `      nodes.push(br(), linkText(it));\n` +
-    `    });\n` +
+    `    if (layout === '双列') {\n` +
+    `      const [left, right] = splitTwo(g.items || []);\n` +
+    `      const n = Math.max(left.length, right.length);\n` +
+    `      for (let i = 0; i < n; i++) {\n` +
+    `        nodes.push(br());\n` +
+    `        if (left[i]) nodes.push(linkText(left[i]));\n` +
+    `        if (left[i] && right[i]) nodes.push(schema.text(' ｜ '));\n` +
+    `        if (right[i]) nodes.push(linkText(right[i]));\n` +
+    `      }\n` +
+    `    } else {\n` +
+    `      (g.items || []).forEach((it) => {\n` +
+    `        nodes.push(br(), linkText(it));\n` +
+    `      });\n` +
+    `    }\n` +
     `  });\n` +
     `  nodes.push(br());\n\n` +
     `  view.dispatch(view.state.tr.replaceWith(0, view.state.doc.content.size, nodes));\n` +
     `  const content = vue.getContent ? vue.getContent() : null;\n` +
-    `  console.log('贴图引导语已写入', { groups: groups.length, content });\n` +
+    `  console.log('贴图引导语已写入', { layout, groups: groups.length, content });\n` +
     `  return content;\n` +
     `})();\n`
   );
 }
 
-export function buildPicPreviewGroups(enriched) {
-  const cats = resolveTocCategories(enriched.categories);
-  return groupByCategory(filterArticles(enriched.articles, "贴图"), cats).map(
-    ({ category, items }) => ({
-      category: categoryLabelPic(category),
-      items: items.map((a) => ({
-        title: String(a.displayTitle || a.title || "未命名").trim(),
-        href: String(a.content_url || "").trim(),
-      })),
-    })
-  );
+export function buildPicPreviewGroups(enriched, layout = "单列") {
+  const groups = picDataGroups(enriched).map((g) => ({
+    category: g.category,
+    items: g.items.map((it) => ({ title: it.title, href: it.href })),
+  }));
+  if (layout !== "双列") return groups;
+  return groups.map((g) => {
+    const mid = Math.ceil(g.items.length / 2);
+    return {
+      category: g.category,
+      left: g.items.slice(0, mid),
+      right: g.items.slice(mid),
+    };
+  });
 }
