@@ -198,7 +198,7 @@ export default function Articles() {
                   <select
                     className="cat-select"
                     value={r.category}
-                    style={categorySelectStyle(r.category)}
+                    style={categorySelectStyle(r.category, categories)}
                     onChange={(e) =>
                       patchArticle(r.content_url, { category: e.target.value })
                     }
