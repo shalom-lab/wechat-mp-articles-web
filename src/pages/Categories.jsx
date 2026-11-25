@@ -84,6 +84,7 @@ export default function Categories() {
   }
 
   function rename(idx, name) {
+    // 同步 articles[].category，保存后写回仓库
     renameCategory(idx, name);
   }
 
@@ -92,7 +93,7 @@ export default function Categories() {
     const d = defaultCategoryMeta("新类目");
     setCategories([
       ...cats,
-      { name: "新类目", includeInToc: true, emoji: d.emoji, caption: d.caption },
+      { name: "新类目", includeInToc: true, emoji: d.emoji },
     ]);
   }
 
@@ -117,7 +118,7 @@ export default function Categories() {
   return (
     <div className="page">
       <div className="toolbar">
-        <span className="muted">勾选 = TOC · emoji / 显示名用于图文标题 · 图标调序</span>
+        <span className="muted">勾选 = TOC · 改名会同步文章归属 · emoji 用于图文标题</span>
         <div className="row toolbar-actions">
           <button
             className="btn ghost sm"
@@ -146,7 +147,6 @@ export default function Categories() {
           <span className="cat-head-toc">TOC</span>
           <span className="cat-head-emoji">emoji</span>
           <span className="cat-head-name">类目名</span>
-          <span className="cat-head-caption">TOC 显示名</span>
           <span className="cat-head-actions" />
         </div>
         <ol className="cat-list">
@@ -167,15 +167,8 @@ export default function Categories() {
               <input
                 className="cell-input cat-name"
                 value={c.name}
-                title="类目名（文章归类用）"
+                title="类目名（文章归属 + TOC 标题）"
                 onChange={(e) => rename(idx, e.target.value)}
-              />
-              <input
-                className="cell-input cat-caption"
-                value={c.caption || ""}
-                title="图文 TOC 标题文案"
-                placeholder={c.name || "显示名"}
-                onChange={(e) => patch(idx, { caption: e.target.value })}
               />
               <div className="icon-actions">
                 {pendingDelete === idx ? (

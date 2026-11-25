@@ -27,9 +27,9 @@
 | 文件 | 角色 |
 | --- | --- |
 | `data/articles_<id>.csv` | filter 刷新的库存主清单（标题/日期/类型等） |
-| `data/enriched_articles_<id>.json` | enrich + **人工** 层：`category` / `displayTitle` / `includeInToc` / `categories[{ name, includeInToc, emoji, caption }]` |
+| `data/enriched_articles_<id>.json` | enrich + **人工** 层：`category` / `displayTitle` / `includeInToc` / `categories[{ name, includeInToc, emoji }]` |
 
-enrich Action **不会**覆盖已有 `category`、`displayTitle`、`includeInToc`，并保留人工类目顺序、开关、`emoji`、`caption`。
+enrich Action **不会**覆盖已有 `category`、`displayTitle`、`includeInToc`，并保留人工类目顺序、开关、`emoji`。类目改名时 Web 会同步 `articles[].category`。
 
 ## 本地开发
 
@@ -49,6 +49,6 @@ npm run dev
 ## 页面
 
 1. **文章**：CSV 清单 + 可编辑短标题/类目/是否进 TOC → 保存写回 enriched JSON  
-2. **类目**：TOC 顺序、开关、emoji、显示名（图文标题用 `emoji+caption`）  
+2. **类目**：TOC 顺序、开关、emoji（图文标题用 `emoji+类目名`；改名同步文章归属）  
 3. **TOC**：图文 / 贴图预览与复制注入脚本（逻辑对齐 articles 的 build-wechat-toc）  
 4. **设置**：BYOK

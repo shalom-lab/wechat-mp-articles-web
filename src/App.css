@@ -230,7 +230,7 @@ main { padding: 14px 16px 48px; max-width: 1180px; margin: 0 auto; }
 }
 .cat-head-toc { width: 18px; text-align: center; }
 .cat-head-emoji { width: 44px; text-align: center; }
-.cat-head-name, .cat-head-caption { flex: 1; min-width: 0; }
+.cat-head-name { flex: 1; min-width: 0; }
 .cat-head-actions { width: 92px; flex-shrink: 0; }
 .cat-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .cat-list li {
@@ -241,7 +241,7 @@ main { padding: 14px 16px 48px; max-width: 1180px; margin: 0 auto; }
   width: 44px; flex: 0 0 44px; text-align: center; font-size: 16px;
   padding: 3px 2px; line-height: 1.2;
 }
-.cat-name, .cat-caption { flex: 1; min-width: 72px; }
+.cat-name { flex: 1; min-width: 120px; }
 .icon-actions {
   display: inline-flex; align-items: center; gap: 2px; margin-left: 0; flex-shrink: 0;
   width: 92px; justify-content: flex-end;

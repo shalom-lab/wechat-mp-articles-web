@@ -1,16 +1,17 @@
 /**
  * 与 wechat-mp-articles/scripts/build-wechat-toc.mjs 对齐的 TOC 渲染（浏览器端）。
- * 数据源：enriched JSON；人工字段 includeInToc / emoji / caption。
+ * 数据源：enriched JSON；人工字段 includeInToc / emoji。
+ * 类目只用一个 name：既是文章归属键，也是 TOC 标题文案。
  */
 
-/** 缺省装饰；JSON 里有 emoji/caption 时优先用数据 */
+/** 缺省 emoji；JSON 里有 emoji 时优先用数据 */
 export const CATEGORY_META = {
-  R语言基础篇: { emoji: "📋", caption: "R语言基础篇" },
-  R项目与代码管理: { emoji: "🛠️", caption: "R项目与代码管理" },
-  流行病学: { emoji: "👥", caption: "流行病学" },
-  R语言作图: { emoji: "📊", caption: "数据可视化" },
-  Shiny应用开发: { emoji: "🌐", caption: "Shiny应用" },
-  其他: { emoji: "📎", caption: "其他" },
+  R语言基础篇: { emoji: "📋" },
+  R项目与代码管理: { emoji: "🛠️" },
+  流行病学: { emoji: "👥" },
+  R语言作图: { emoji: "📊" },
+  Shiny应用开发: { emoji: "🌐" },
+  其他: { emoji: "📎" },
 };
 
 function escHtml(s) {
@@ -27,7 +28,7 @@ function escAttr(s) {
 
 export function defaultCategoryMeta(name) {
   const n = String(name || "").trim();
-  return CATEGORY_META[n] || { emoji: "📁", caption: n || "未命名" };
+  return CATEGORY_META[n] || { emoji: "📁" };
 }
 
 export function normalizeCategories(raw) {
@@ -38,28 +39,26 @@ export function normalizeCategories(raw) {
     let name = "";
     let includeInToc = true;
     let emoji = "";
-    let caption = "";
     if (typeof c === "string") name = c.trim();
     else if (c && typeof c === "object") {
       name = String(c.name || "").trim();
       includeInToc = c.includeInToc !== false;
       emoji = String(c.emoji || "").trim();
-      caption = String(c.caption || "").trim();
     }
     if (!name || seen.has(name)) continue;
     seen.add(name);
     const d = defaultCategoryMeta(name);
+    // 不再持久化 caption；旧 JSON 里的 caption 忽略
     out.push({
       name,
       includeInToc,
       emoji: emoji || d.emoji,
-      caption: caption || d.caption,
     });
   }
   return out;
 }
 
-/** TOC 开启的类目（含 emoji/caption） */
+/** TOC 开启的类目（含 emoji） */
 export function resolveTocCategories(categories) {
   return normalizeCategories(categories).filter((c) => c.includeInToc);
 }
@@ -91,21 +90,19 @@ function splitTwoColumns(items) {
   return [items.slice(0, mid), items.slice(mid)];
 }
 
-/** 图文类目标题：emoji + caption */
+/** 图文类目标题：emoji + 类目名 */
 export function categoryLabel(cat) {
   const name = typeof cat === "string" ? cat : cat?.name;
   const d = defaultCategoryMeta(name);
   const emoji =
     (typeof cat === "object" && String(cat.emoji || "").trim()) || d.emoji;
-  const caption =
-    (typeof cat === "object" && String(cat.caption || "").trim()) || d.caption;
-  return `${emoji}${caption}`;
+  return `${emoji}${String(name || "").trim()}`;
 }
 
-/** 贴图类目标题：caption（无 emoji） */
+/** 贴图类目标题：类目名（无 emoji） */
 function categoryLabelPic(cat) {
   if (typeof cat === "object" && cat) {
-    return String(cat.caption || cat.name || "").trim();
+    return String(cat.name || "").trim();
   }
   return String(cat || "").trim();
 }
