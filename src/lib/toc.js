@@ -138,7 +138,7 @@ function renderColumn(items) {
     `<td width="50%" valign="top" style="border: none;width: 50%;overflow: visible;word-break: break-word;` +
     `overflow-wrap: anywhere;background-color: rgb(255, 255, 255);padding: 0 4px;vertical-align: top;">` +
     `<ul style="list-style-type: none;list-style: none;margin: 0;padding-left: 0;overflow: visible;">` +
-    items.map((a) => `<li><p>${renderLink(a)}</p></li>`).join("") +
+    items.map((a) => `<li><p style="margin:0;padding:0;">${renderLink(a)}</p></li>`).join("") +
     `</ul></td>`
   );
 }
@@ -151,7 +151,7 @@ const TITLE_BG =
 function renderCategoryTitle(category) {
   const title = escHtml(categoryLabel(category));
   return (
-    `<p style="text-align: center;margin: 0 0 2px;padding: 6px 4px;${TITLE_BG}">` +
+    `<p style="text-align: center;margin: 0;padding: 4px;${TITLE_BG}">` +
     `<strong><span style="color: rgb(0, 122, 170);"><span leaf="">${title}</span></span></strong></p>`
   );
 }
@@ -173,13 +173,16 @@ function renderCategorySingle({ category, items }) {
     `<section class="news-class" style="border: none;padding: 0;margin: 0;box-sizing: border-box;">` +
     renderCategoryTitle(category) +
     `<ul style="list-style-type: none;list-style: none;margin: 0;padding-left: 0;overflow: visible;">` +
-    items.map((a) => `<li><p>${renderLink(a)}</p></li>`).join("") +
+    items.map((a) => `<li><p style="margin:0;padding:0;">${renderLink(a)}</p></li>`).join("") +
     `</ul></section>`
   );
 }
 
 function wrapEditorHtml(blocks) {
-  const spacer = `<p style="margin-bottom: 0px;"><span leaf=""><br></span></p>`;
+  // 类目之间只留一点点空隙（图文双列/单列、贴图双列）；贴图单列不走这里
+  const spacer =
+    `<p style="margin:0;padding:0;line-height:1;font-size:6px;height:6px;">` +
+    `<span leaf=""><br></span></p>`;
   const footer =
     `<p style="margin-bottom: 0px;"><span style="font-size: var(--articleFontsize);letter-spacing: 0.034em;"></span></p>` +
     `<section><span leaf=""><br></span></section>` +
@@ -283,7 +286,10 @@ export function buildPicInject(enriched, layout = "单列") {
     `  };\n\n` +
     `  const nodes = [];\n` +
     `  groups.forEach((g, gi) => {\n` +
-    `    if (gi) nodes.push(br(), br());\n` +
+    `    if (gi) {\n` +
+    `      if (layout === '双列') nodes.push(br());\n` +
+    `      else nodes.push(br(), br());\n` +
+    `    }\n` +
     `    nodes.push(schema.text(g.category));\n` +
     `    if (layout === '双列') {\n` +
     `      const [left, right] = splitTwo(g.items || []);\n` +
