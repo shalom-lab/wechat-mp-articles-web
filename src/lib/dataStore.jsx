@@ -186,6 +186,26 @@ export function DataProvider({ children }) {
     setDirty(true);
   }
 
+  /** 改类目名，并同步 articles[].category 里的旧名称 */
+  function renameCategory(idx, name) {
+    setEnriched((prev) => {
+      if (!prev) return prev;
+      const categories = [...(prev.categories || [])];
+      const oldName = String(categories[idx]?.name || "");
+      const nextName = String(name ?? "");
+      if (!categories[idx]) return prev;
+      categories[idx] = { ...categories[idx], name: nextName };
+      const articles =
+        oldName && oldName !== nextName
+          ? (prev.articles || []).map((a) =>
+              a.category === oldName ? { ...a, category: nextName } : a
+            )
+          : prev.articles;
+      return { ...prev, categories, articles };
+    });
+    setDirty(true);
+  }
+
   async function saveEnriched(message) {
     if (!enriched || !ready) return;
     setBusy(true);
@@ -292,6 +312,7 @@ export function DataProvider({ children }) {
     switchAccount,
     patchArticle,
     setCategories,
+    renameCategory,
     saveEnriched,
   };
 

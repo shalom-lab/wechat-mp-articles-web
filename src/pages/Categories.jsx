@@ -55,6 +55,7 @@ export default function Categories() {
     dirty,
     reload,
     setCategories,
+    renameCategory,
     saveEnriched,
   } = useData();
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -78,8 +79,8 @@ export default function Categories() {
   }
 
   function rename(idx, name) {
-    const next = cats.map((c, i) => (i === idx ? { ...c, name } : c));
-    setCategories(next);
+    // 改名时同步文章里挂的旧类目名，避免 TOC 分组脱节
+    renameCategory(idx, name);
   }
 
   function add() {
@@ -136,7 +137,7 @@ export default function Categories() {
       <div className="card">
         <ol className="cat-list">
           {cats.map((c, idx) => (
-            <li key={`${c.name}-${idx}`}>
+            <li key={`cat-row-${idx}`}>
               <input
                 type="checkbox"
                 checked={c.includeInToc !== false}
