@@ -32,22 +32,6 @@ function IconTrash() {
   );
 }
 
-function IconCheck() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="m5 12 5 5L20 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconX() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M7 7l10 10M17 7 7 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 export default function Categories() {
   const {
     ready,
@@ -62,6 +46,8 @@ export default function Categories() {
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const cats = enriched?.categories || [];
+  const pendingName =
+    pendingDelete == null ? "" : String(cats[pendingDelete]?.name || "");
 
   function move(idx, dir) {
     setPendingDelete(null);
@@ -84,7 +70,6 @@ export default function Categories() {
   }
 
   function rename(idx, name) {
-    // 同步 articles[].category，保存后写回仓库
     renameCategory(idx, name);
   }
 
@@ -105,13 +90,9 @@ export default function Categories() {
     setPendingDelete(null);
   }
 
-  function confirmDelete(idx) {
-    const name = cats[idx]?.name || "";
-    if (!window.confirm(`再次确认删除「${name}」？此操作保存后才会写回仓库。`)) {
-      setPendingDelete(null);
-      return;
-    }
-    setCategories(cats.filter((_, i) => i !== idx));
+  function confirmDelete() {
+    if (pendingDelete == null) return;
+    setCategories(cats.filter((_, i) => i !== pendingDelete));
     setPendingDelete(null);
   }
 
@@ -171,62 +152,67 @@ export default function Categories() {
                 onChange={(e) => rename(idx, e.target.value)}
               />
               <div className="icon-actions">
-                {pendingDelete === idx ? (
-                  <>
-                    <span className="confirm-hint">确认删除？</span>
-                    <button
-                      type="button"
-                      className="icon-btn danger"
-                      title="确认删除"
-                      onClick={() => confirmDelete(idx)}
-                    >
-                      <IconCheck />
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-btn"
-                      title="取消"
-                      onClick={cancelDelete}
-                    >
-                      <IconX />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className="icon-btn"
-                      title="上移"
-                      disabled={idx === 0}
-                      onClick={() => move(idx, -1)}
-                    >
-                      <IconUp />
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-btn"
-                      title="下移"
-                      disabled={idx === cats.length - 1}
-                      onClick={() => move(idx, 1)}
-                    >
-                      <IconDown />
-                    </button>
-                    <button
-                      type="button"
-                      className="icon-btn danger"
-                      title="删除"
-                      onClick={() => askDelete(idx)}
-                    >
-                      <IconTrash />
-                    </button>
-                  </>
-                )}
+                <button
+                  type="button"
+                  className="icon-btn"
+                  title="上移"
+                  disabled={idx === 0}
+                  onClick={() => move(idx, -1)}
+                >
+                  <IconUp />
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  title="下移"
+                  disabled={idx === cats.length - 1}
+                  onClick={() => move(idx, 1)}
+                >
+                  <IconDown />
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn danger"
+                  title="删除"
+                  onClick={() => askDelete(idx)}
+                >
+                  <IconTrash />
+                </button>
               </div>
             </li>
           ))}
         </ol>
         {!cats.length ? <p className="muted">暂无类目，先加载数据</p> : null}
       </div>
+
+      {pendingDelete != null ? (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={cancelDelete}
+        >
+          <div
+            className="modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cat-del-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="cat-del-title">删除类目</h3>
+            <p>
+              确认删除「{pendingName || "未命名"}」？保存后才会写回仓库；文章里挂的该类目名不会自动清空。
+            </p>
+            <div className="modal-actions">
+              <button type="button" className="btn ghost sm" onClick={cancelDelete}>
+                取消
+              </button>
+              <button type="button" className="btn sm danger" onClick={confirmDelete}>
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

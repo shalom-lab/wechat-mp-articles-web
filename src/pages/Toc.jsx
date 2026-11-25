@@ -97,7 +97,7 @@ export default function Toc() {
     <div className="page">
       <div className="toolbar">
         <span className="muted">
-          {status || "图文双列/单列 · 贴图仅单列（不支持表格）"}
+          {status || "三列预览：图文双列 / 图文单列 / 贴图单列"}
         </span>
         <div className="row toolbar-actions">
           <button
