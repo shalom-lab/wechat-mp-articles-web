@@ -183,9 +183,8 @@ function wrapEditorHtml(blocks) {
   const spacer =
     `<p style="margin:0;padding:0;line-height:1;font-size:6px;height:6px;">` +
     `<span leaf=""><br></span></p>`;
+  // 仅保留隐藏元数据，不再追加底部空行
   const footer =
-    `<p style="margin-bottom: 0px;"><span style="font-size: var(--articleFontsize);letter-spacing: 0.034em;"></span></p>` +
-    `<section><span leaf=""><br></span></section>` +
     `<p style="display: none;"><mp-style-type data-value="3"></mp-style-type></p>`;
   return blocks.join(spacer) + footer + "\n";
 }
