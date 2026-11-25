@@ -1,9 +1,10 @@
 /**
  * 与 wechat-mp-articles/scripts/build-wechat-toc.mjs 对齐的 TOC 渲染（浏览器端）。
- * 数据源：enriched JSON；人工开关 includeInToc。
+ * 数据源：enriched JSON；人工字段 includeInToc / emoji / caption。
  */
 
-const CATEGORY_META = {
+/** 缺省装饰；JSON 里有 emoji/caption 时优先用数据 */
+export const CATEGORY_META = {
   R语言基础篇: { emoji: "📋", caption: "R语言基础篇" },
   R项目与代码管理: { emoji: "🛠️", caption: "R项目与代码管理" },
   流行病学: { emoji: "👥", caption: "流行病学" },
@@ -24,6 +25,11 @@ function escAttr(s) {
   return escHtml(s).replace(/'/g, "&#39;");
 }
 
+export function defaultCategoryMeta(name) {
+  const n = String(name || "").trim();
+  return CATEGORY_META[n] || { emoji: "📁", caption: n || "未命名" };
+}
+
 export function normalizeCategories(raw) {
   const list = Array.isArray(raw) ? raw : [];
   const out = [];
@@ -31,22 +37,31 @@ export function normalizeCategories(raw) {
   for (const c of list) {
     let name = "";
     let includeInToc = true;
+    let emoji = "";
+    let caption = "";
     if (typeof c === "string") name = c.trim();
     else if (c && typeof c === "object") {
       name = String(c.name || "").trim();
       includeInToc = c.includeInToc !== false;
+      emoji = String(c.emoji || "").trim();
+      caption = String(c.caption || "").trim();
     }
     if (!name || seen.has(name)) continue;
     seen.add(name);
-    out.push({ name, includeInToc });
+    const d = defaultCategoryMeta(name);
+    out.push({
+      name,
+      includeInToc,
+      emoji: emoji || d.emoji,
+      caption: caption || d.caption,
+    });
   }
   return out;
 }
 
-export function resolveTocCategoryNames(categories) {
-  return normalizeCategories(categories)
-    .filter((c) => c.includeInToc)
-    .map((c) => c.name);
+/** TOC 开启的类目（含 emoji/caption） */
+export function resolveTocCategories(categories) {
+  return normalizeCategories(categories).filter((c) => c.includeInToc);
 }
 
 function sortArticles(list) {
@@ -57,11 +72,16 @@ function sortArticles(list) {
   );
 }
 
-function groupByCategory(articles, categoryNames) {
+function groupByCategory(articles, categories) {
   const groups = [];
-  for (const category of categoryNames) {
-    const items = sortArticles(articles.filter((a) => a.category === category));
-    if (items.length) groups.push({ category, items });
+  for (const cat of categories) {
+    const name = typeof cat === "string" ? cat : cat.name;
+    const meta =
+      typeof cat === "object" && cat
+        ? cat
+        : { name, ...defaultCategoryMeta(name) };
+    const items = sortArticles(articles.filter((a) => a.category === name));
+    if (items.length) groups.push({ category: meta, items });
   }
   return groups;
 }
@@ -71,9 +91,23 @@ function splitTwoColumns(items) {
   return [items.slice(0, mid), items.slice(mid)];
 }
 
-function categoryLabel(category) {
-  const meta = CATEGORY_META[category] || { emoji: "📁", caption: category };
-  return `${meta.emoji}${meta.caption}`;
+/** 图文类目标题：emoji + caption */
+export function categoryLabel(cat) {
+  const name = typeof cat === "string" ? cat : cat?.name;
+  const d = defaultCategoryMeta(name);
+  const emoji =
+    (typeof cat === "object" && String(cat.emoji || "").trim()) || d.emoji;
+  const caption =
+    (typeof cat === "object" && String(cat.caption || "").trim()) || d.caption;
+  return `${emoji}${caption}`;
+}
+
+/** 贴图类目标题：caption（无 emoji） */
+function categoryLabelPic(cat) {
+  if (typeof cat === "object" && cat) {
+    return String(cat.caption || cat.name || "").trim();
+  }
+  return String(cat || "").trim();
 }
 
 function filterArticles(all, type) {
@@ -131,7 +165,7 @@ function renderCategoryBlock({ category, items }) {
 }
 
 export function buildNewsHtml(enriched) {
-  const cats = resolveTocCategoryNames(enriched.categories);
+  const cats = resolveTocCategories(enriched.categories);
   const groups = groupByCategory(filterArticles(enriched.articles, "图文"), cats);
   const spacer = `<p style="margin-bottom: 0px;"><span leaf=""><br></span></p>`;
   const footer =
@@ -154,10 +188,10 @@ export function buildNewsInject(html) {
 }
 
 export function buildPicInject(enriched) {
-  const cats = resolveTocCategoryNames(enriched.categories);
+  const cats = resolveTocCategories(enriched.categories);
   const groups = groupByCategory(filterArticles(enriched.articles, "贴图"), cats).map(
     ({ category, items }) => ({
-      category: String(category || "").trim(),
+      category: categoryLabelPic(category),
       items: items.map((a) => ({
         title: String(a.displayTitle || a.title || "未命名").trim(),
         href: String(a.content_url || "").trim(),
@@ -209,10 +243,10 @@ export function buildPicInject(enriched) {
 }
 
 export function buildPicPreviewGroups(enriched) {
-  const cats = resolveTocCategoryNames(enriched.categories);
+  const cats = resolveTocCategories(enriched.categories);
   return groupByCategory(filterArticles(enriched.articles, "贴图"), cats).map(
     ({ category, items }) => ({
-      category: String(category || "").trim(),
+      category: categoryLabelPic(category),
       items: items.map((a) => ({
         title: String(a.displayTitle || a.title || "未命名").trim(),
         href: String(a.content_url || "").trim(),
